@@ -1,0 +1,37 @@
+<plugin>
+    <nom><multi>[fr]Importation de médias</multi></nom>
+    <icon>prive/themes/spip/images/idm-32.png</icon>
+    <auteur>Teddy Payet</auteur>
+    <version>0.1.0</version>
+    <etat>test</etat>
+    <description><multi>
+        [fr]Ce plugin permet l'importation de documents d'un site par consultation HTTP. En effet, il n'est pas toujours possible d'avoir un accès SSH ou FTP d'un site. Le seul accès étant l'accès du site par consultation de l'url public. <br/>Pour se faire, le plugin regarde tous les documents, non-distants, stockés dans la table <em>spip_documents"</em> et construit l'url selon le schéma <em>http://source.tld/IMG/ext/fichier.ext</em>. <br/>Si le fichier existe, alors on le copie dans le répertoire local <em>IMG/ext/fichier.ext</em>. Si un fichier est déjà présent localement, il ne sera pas copié et passe au document suivant.
+    </multi></description>
+    <lien></lien> <!-- URI de documentation -->
+    <fonctions>idm_fonctions.php</fonctions>
+    <prefix>idm</prefix>
+
+    <pipeline>
+        <nom>autoriser</nom>
+        <inclure>idm_autorisations.php</inclure>
+    </pipeline>
+
+    <necessite id="SPIP" version="[2.1.0;3.1.99]" />
+    <necessite id="saisies" version="[1.14.0;]" />
+
+    <categorie>outil</categorie>
+
+    <bouton id='idm' parent='configuration'>
+        <icone>prive/themes/spip/images/idm-32.png</icone>
+        <titre>idm:titre_idm</titre>
+        <url>idm</url>
+    </bouton>
+
+    <!-- Boutons pour plugin Bandeau -->
+    <bouton id='idm_bando' parent='bando_configuration'>
+        <icone>prive/themes/spip/images/idm-16.png</icone>
+        <titre>idm:titre_idm</titre>
+        <url>idm</url>
+    </bouton>
+
+</plugin>
