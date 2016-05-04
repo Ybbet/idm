@@ -1,11 +1,4 @@
 <?php
-/**
- * Created by PhpStorm.
- * User: teddypayet
- * Date: 14/03/2016
- * Time: 17:35
- */
-
 if (!defined('_ECRIRE_INC_VERSION')) {
 	return;
 }
@@ -53,13 +46,13 @@ function idm_command_line() {
 	 */
 	if (preg_match('/^http/', $config_idm) and !preg_match("/^" . $config_idm . "/", $adresse_site)) {
 		$documents = sql_allfetsel('fichier, extension', 'spip_documents', '', '', 'extension');
-
 		/**
 		 * Si on a des documents, on peut procéder à l'alimentation du script sh
 		 */
 		if (is_array($documents) and count($documents) > 0) {
 			$command_line = array();
 			$command_line[] = "#!/bin/bash";
+
 			foreach ($documents as $document) {
 				$command_line[] = "if [ -d " . $dir_img_server . $document['extension'] . '/ ]; then echo ""; else mkdir -p ' . $dir_img_server . $document['extension'] . '/ ; fi';
 				$command_line[] = "cd " . $dir_img_server . $document['extension'] . '/';
@@ -70,6 +63,38 @@ function idm_command_line() {
 
 			try {
 				$handle = fopen(_DIR_RACINE . "import_medias.sh", 'w');
+				fwrite($handle, $command_line);
+				fclose($handle);
+
+				return true;
+			} catch (Exception $e) {
+				echo 'Caught exception: ', $e->getMessage(), "\n";
+			}
+		}
+
+		$spip_version = spip_version();
+		$spip_version = intval($spip_version);
+
+		if ($spip_version == 2) {
+			include_spip('base/connect_sql');
+		} else {
+			include_spip('base/objets');
+		}
+		$tables_principales = $GLOBALS['tables_principales'];
+		$tables_principales = array_keys($tables_principales);
+
+		if (is_array($tables_principales) and count($tables_principales) > 0) {
+			$command_line = array();
+			$command_line[] = "#!/bin/bash";
+
+			foreach ($tables_principales as $table) {
+
+			}
+			$command_line = array_unique($command_line); // ne pas avoir d'action en double (cf. répertoire d'extension)
+			$command_line = implode("\n", $command_line);
+
+			try {
+				$handle = fopen(_DIR_RACINE . "import_logos.sh", 'w');
 				fwrite($handle, $command_line);
 				fclose($handle);
 

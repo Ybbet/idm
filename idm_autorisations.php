@@ -13,16 +13,14 @@ if (!defined('_ECRIRE_INC_VERSION')) {
 	return;
 }
 
-
 /**
  * Fonction d'appel pour le pipeline
+ *
  * @pipeline autoriser
  */
-function idm_autoriser()
-{
+function idm_autoriser() {
 
 }
-
 
 /**
  * Autorisation de voir `idm`
@@ -32,10 +30,10 @@ function idm_autoriser()
  * @param  int    $id    Identifiant de l'objet
  * @param  array  $qui   Description de l'auteur demandant l'autorisation
  * @param  array  $opt   Options de cette autorisation
+ *
  * @return bool          true s'il a le droit, false sinon
  **/
-function autoriser_idm_voir_dist($faire, $type, $id, $qui, $opt)
-{
+function autoriser_idm_voir_dist($faire, $type, $id, $qui, $opt) {
 	return $qui['statut'] == '0minirezo' and $qui['webmestre'] == 'oui';
 }
 
@@ -47,10 +45,10 @@ function autoriser_idm_voir_dist($faire, $type, $id, $qui, $opt)
  * @param  int    $id    Identifiant de l'objet
  * @param  array  $qui   Description de l'auteur demandant l'autorisation
  * @param  array  $opt   Options de cette autorisation
+ *
  * @return bool          true s'il a le droit, false sinon
  **/
-function autoriser_idm_configurer_dist($faire, $type, $id, $qui, $opt)
-{
+function autoriser_idm_configurer_dist($faire, $type, $id, $qui, $opt) {
 	return $qui['statut'] == '0minirezo' and $qui['webmestre'] == 'oui';
 }
 
@@ -66,10 +64,10 @@ function autoriser_idm_configurer_dist($faire, $type, $id, $qui, $opt)
  * @param  int    $id    Identifiant de l'objet
  * @param  array  $qui   Description de l'auteur demandant l'autorisation
  * @param  array  $opt   Options de cette autorisation
+ *
  * @return bool          true s'il a le droit, false sinon
  **/
-function autoriser_configurer_idm_bouton_dist($faire, $type, $id, $qui, $opt)
-{
+function autoriser_configurer_idm_bouton_dist($faire, $type, $id, $qui, $opt) {
 	return $qui['statut'] == '0minirezo' and $qui['webmestre'] == 'oui';
 }
 
@@ -81,10 +79,10 @@ function autoriser_configurer_idm_bouton_dist($faire, $type, $id, $qui, $opt)
  * @param  int    $id    Identifiant de l'objet
  * @param  array  $qui   Description de l'auteur demandant l'autorisation
  * @param  array  $opt   Options de cette autorisation
+ *
  * @return bool          true s'il a le droit, false sinon
  **/
-function autoriser_idm_bouton_dist($faire, $type, $id, $qui, $opt)
-{
+function autoriser_idm_bouton_dist($faire, $type, $id, $qui, $opt) {
 	return $qui['statut'] == '0minirezo' and $qui['webmestre'] == 'oui';
 }
 
@@ -97,10 +95,10 @@ function autoriser_idm_bouton_dist($faire, $type, $id, $qui, $opt)
  * @param  int    $id    Identifiant de l'objet
  * @param  array  $qui   Description de l'auteur demandant l'autorisation
  * @param  array  $opt   Options de cette autorisation
+ *
  * @return bool          true s'il a le droit, false sinon
  **/
-function autoriser_configurer_idm_bando_bouton_dist($faire, $type, $id, $qui, $opt)
-{
+function autoriser_configurer_idm_bando_bouton_dist($faire, $type, $id, $qui, $opt) {
 	return $qui['statut'] == '0minirezo' and $qui['webmestre'] == 'oui';
 }
 
@@ -113,10 +111,10 @@ function autoriser_configurer_idm_bando_bouton_dist($faire, $type, $id, $qui, $o
  * @param  int    $id    Identifiant de l'objet
  * @param  array  $qui   Description de l'auteur demandant l'autorisation
  * @param  array  $opt   Options de cette autorisation
+ *
  * @return bool          true s'il a le droit, false sinon
  **/
-function autoriser_idm_bando_bouton_dist($faire, $type, $id, $qui, $opt)
-{
+function autoriser_idm_bando_bouton_dist($faire, $type, $id, $qui, $opt) {
 	return $qui['statut'] == '0minirezo' and $qui['webmestre'] == 'oui';
 }
 
@@ -133,10 +131,10 @@ function autoriser_idm_bando_bouton_dist($faire, $type, $id, $qui, $opt)
  * @param  int    $id    Identifiant de l'objet
  * @param  array  $qui   Description de l'auteur demandant l'autorisation
  * @param  array  $opt   Options de cette autorisation
+ *
  * @return bool          true s'il a le droit, false sinon
  **/
-function autoriser_configureridm_menu_dist($faire, $type, $id, $qui, $opt)
-{
+function autoriser_configureridm_menu_dist($faire, $type, $id, $qui, $opt) {
 	return $qui['statut'] == '0minirezo' and $qui['webmestre'] == 'oui';
 }
 
@@ -148,10 +146,10 @@ function autoriser_configureridm_menu_dist($faire, $type, $id, $qui, $opt)
  * @param  int    $id    Identifiant de l'objet
  * @param  array  $qui   Description de l'auteur demandant l'autorisation
  * @param  array  $opt   Options de cette autorisation
+ *
  * @return bool          true s'il a le droit, false sinon
  **/
-function autoriser_idm_menu_dist($faire, $type, $id, $qui, $opt)
-{
+function autoriser_idm_menu_dist($faire, $type, $id, $qui, $opt) {
 	return $qui['statut'] == '0minirezo' and $qui['webmestre'] == 'oui';
 }
 
