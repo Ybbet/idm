@@ -1,15 +1,1 @@
-<h1><:idm:idm_titre:></h1>
-
-<div class="explication">
-	<:idm:idm_explication:>
-</div>
-[(#REM)
-Si l'url source renseignée dans ?exec=configurer_idm est la même que l'adresse du site, c'est que nous sommes sur l'environnement de production, ou du moins sur le site que nous désirons extraire les documents.
-Pour éviter un 'paradoxe', on ne lance pas la création du fichier shell.
-]
-[(#URL_SITE_SPIP|match{^#CONFIG{idm/source}}|?{
-<div class='notice'><:idm:environnement_source_info:></div>,
-[(#VAL|idm_command_line|?{
-<div class='success'><:idm:fichier_bash_idm_creation_ok:></div>,
-<div class='notice'><:idm:fichier_bash_idm_creation_ko:></div>})]
-})]
+[(#INCLURE{fond=prive/squelettes/contenu/idm, env})]

@@ -8,8 +8,33 @@ Si l'url source renseignée dans ?exec=configurer_idm est la même que l'adresse
 Pour éviter un 'paradoxe', on ne lance pas la création du fichier shell.
 ]
 [(#URL_SITE_SPIP|match{^#CONFIG{idm/source}}|?{
-<div class='notice'><:idm:environnement_source_info:></div>,
-[(#VAL|idm_command_line|?{
-<div class='success'><:idm:fichier_bash_idm_creation_ok:></div>,
-<div class='notice'><:idm:fichier_bash_idm_creation_ko:></div>})]
-})]
+<div class='notice'><:idm:environnement_source_info:></div>})]
+[(#SET{objets_exclus,#LISTE{spip_jobs,spip_types_documents,spip_forum,spip_messages,spip_petitions,spip_signatures,spip_depots,spip_plugins,spip_paquets,spip_documents,spip_formulaires,spip_formulaires_reponses,spip_formulaires_reponses_champs}})]
+<B_objets>
+	<table class="table spip liste">
+		<thead>
+			<tr>
+				<th><:idm:nom_objets_label:></th>
+				<th><:idm:action_label:></th>
+			</tr>
+		</thead>
+		<tbody>
+		<tr>
+			<td>spip_documents</td>
+			<td>[(#VAL|idm_command_line|?{
+				<div class='success'><:idm:fichier_bash_idm_creation_ok{fichier=import_medias.sh}:></div>,
+				<div class='notice'><:idm:fichier_bash_idm_creation_ko{fichier=import_medias.sh}:></div>})]</td>
+		</tr>
+<BOUCLE_objets (DATA) {source table, #VAL|idm_nom_tables_principales} {par valeur} {valeur !IN #GET{objets_exclus}} {si #URL_SITE_SPIP|match{^#CONFIG{idm/source}}|non}>
+	<tr>[(#SET{objet,#VALEUR|objet_type})]
+		<td>#VALEUR</td>
+		<td>
+			[(#VALEUR|idm_bash_objet|?{
+			<div class='success'><:idm:fichier_bash_idm_creation_ok:></div>,
+			<div class='notice'><:idm:fichier_bash_idm_creation_ko:></div>})]
+		</td>
+	</tr>
+</BOUCLE_objets>
+		</tbody>
+	</table>
+</B_objets>

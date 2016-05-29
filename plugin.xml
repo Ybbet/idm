@@ -23,6 +23,7 @@
 
 	<necessite id="SPIP" version="[2.1.0;3.1.99]"/>
 	<necessite id="saisies" version="[1.14.0;]"/>
+	<necessite id="iterateurs" version="[1.0.0;]"/>
 
 	<categorie>outil</categorie>
 

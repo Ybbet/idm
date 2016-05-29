@@ -38,14 +38,14 @@ function idm_command_line() {
 	idm_create_repository_img();
 	$adresse_site = lire_config('adresse_site');
 	$config_idm = lire_config('idm/source');
-	$dir_img_server = $_SERVER['DOCUMENT_ROOT'] . preg_replace("/\.\.\//", '/', _DIR_IMG);
+	$dir_img_server = $_SERVER['DOCUMENT_ROOT'] . preg_replace("/\.\.\//", '', _DIR_IMG);
 	$dir_img = preg_replace("/\.\.\//", '/', _DIR_IMG);
 	/**
 	 * Si l'url source est la même que le présent site,
 	 * la fonction ne se lancera pas.
 	 */
 	if (preg_match('/^http/', $config_idm) and !preg_match("/^" . $config_idm . "/", $adresse_site)) {
-		$documents = sql_allfetsel('fichier, extension', 'spip_documents', '', '', 'extension');
+		$documents = sql_allfetsel('fichier, extension', 'spip_documents', "distant='non'", '', 'extension');
 		/**
 		 * Si on a des documents, on peut procéder à l'alimentation du script sh
 		 */
@@ -71,30 +71,62 @@ function idm_command_line() {
 				echo 'Caught exception: ', $e->getMessage(), "\n";
 			}
 		}
+	}
 
-		$spip_version = spip_version();
-		$spip_version = intval($spip_version);
+	return false;
+}
 
-		if ($spip_version == 2) {
-			include_spip('base/connect_sql');
-		} else {
-			include_spip('base/objets');
-		}
-		$tables_principales = $GLOBALS['tables_principales'];
-		$tables_principales = array_keys($tables_principales);
+function idm_bash_objet($_objets = 'articles') {
+	include_spip('inc/config');
+	include_spip('inc/chercher_logo');
+	$spip_version = spip_version();
+	$spip_num = intval($spip_version);
+	if ($spip_num == 2) {
+		include_spip('base/connect_sql');
+	} else {
+		include_spip('base/abstract_sql');
+		include_spip('base/objets');
+	}
+	$adresse_site = lire_config('adresse_site');
+	$config_idm = lire_config('idm/source');
+	/**
+	 * Si l'url source est la même que le présent site,
+	 * la fonction ne se lancera pas.
+	 */
+	if (preg_match('/^http/', $config_idm) and !preg_match("/^" . $config_idm . "/", $adresse_site)) {
+		$dir_img_server = $_SERVER['DOCUMENT_ROOT'] . preg_replace("/\.\.\//", '/', _DIR_IMG);
+		$dir_img = preg_replace("/\.\.\//", '/', _DIR_IMG);
+		$objet = objet_type($_objets);
+		$table_objet_sql = table_objet_sql($objet);
+		$id_table_objet = id_table_objet($objet);
+		$type_logo = type_du_logo($id_table_objet);
+		$modes_logos = array('on', 'off');
+		global $formats_logos;
 
-		if (is_array($tables_principales) and count($tables_principales) > 0) {
+		$objets_bdd = sql_allfetsel($id_table_objet, $table_objet_sql, '', '', $id_table_objet);
+
+		/**
+		 * On a bien des objets enregistrés en BDD,
+		 * donc on peut travailler
+		 */
+		if (is_array($objets_bdd) and count($objets_bdd) > 0) {
 			$command_line = array();
 			$command_line[] = "#!/bin/bash";
+			$command_line[] = "cd " . $dir_img_server;
 
-			foreach ($tables_principales as $table) {
-
+			foreach ($objets_bdd as $objet_bdd) {
+				foreach ($modes_logos as $mode) {
+					foreach ($formats_logos as $format) {
+						$logo_objet = $type_logo . $mode . $objet_bdd[$id_table_objet] . '.' . $format;
+						$command_line[] = 'if [ -f ' . $dir_img_server . $logo_objet . ' ]; then echo "Le fichier ' . $dir_img_server . $logo_objet . ' existe" ; else wget --spider -v ' . $config_idm . $dir_img . $logo_objet . ' && wget ' . $config_idm . $dir_img . $logo_objet . ' || echo "Le fichier ' . $config_idm . $dir_img . $logo_objet . ' n\'est pas accessible" ; fi';
+					}
+				}
 			}
-			$command_line = array_unique($command_line); // ne pas avoir d'action en double (cf. répertoire d'extension)
+			$command_line = array_unique($command_line); // ne pas avoir d'action en double
 			$command_line = implode("\n", $command_line);
 
 			try {
-				$handle = fopen(_DIR_RACINE . "import_logos.sh", 'w');
+				$handle = fopen(_DIR_RACINE . 'import_logos_'. $objet .'.sh', 'w');
 				fwrite($handle, $command_line);
 				fclose($handle);
 
@@ -105,5 +137,11 @@ function idm_command_line() {
 		}
 	}
 
-	return false;
+}
+
+function idm_nom_tables_principales() {
+	$tables_principales = $GLOBALS['tables_principales'];
+	$tables_principales = array_keys($tables_principales);
+
+	return $tables_principales;
 }

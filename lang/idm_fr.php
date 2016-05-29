@@ -15,8 +15,8 @@ $GLOBALS[$GLOBALS['idx_lang']] = array(
 	'environnement_source_info' => 'Vous êtes sur l\'environnement source',
 
 	// F
-	'fichier_bash_idm_creation_ko' => 'Le fichier <em>import_medias.sh</em> n\'a pu être créé',
-	'fichier_bash_idm_creation_ok' => 'Le fichier <em>import_medias.sh</em> a été créé avec succès.',
+	'fichier_bash_idm_creation_ko' => 'Le fichier bash n\'a pu être créé',
+	'fichier_bash_idm_creation_ok' => 'Le fichier bash a été créé avec succès.',
 
 	// I
 	'idm_icone_label' => 'Importer les médias de la source',
