@@ -52,12 +52,8 @@ function idm_command_line() {
 		if (is_array($documents) and count($documents) > 0) {
 			$command_line = array();
 			$command_line[] = "#!/bin/bash";
+			$command_line = array_merge($command_line, idm_formater_command_documents($documents, $dir_img_server, $dir_img));
 
-			foreach ($documents as $document) {
-				$command_line[] = "if [ -d " . $dir_img_server . $document['extension'] . '/ ]; then echo ""; else mkdir -p ' . $dir_img_server . $document['extension'] . '/ ; fi';
-				$command_line[] = "cd " . $dir_img_server . $document['extension'] . '/';
-				$command_line[] = 'if [ -f ' . $dir_img_server . $document['fichier'] . ' ]; then echo "Le fichier ' . $dir_img_server . $document['fichier'] . ' existe" ; else wget --spider -v ' . $config_idm . $dir_img . $document['fichier'] . ' && wget ' . $config_idm . $dir_img . $document['fichier'] . ' || echo "Le fichier ' . $config_idm . $dir_img . $document['fichier'] . ' n\'est pas accessible" ; fi';
-			}
 			$command_line = array_unique($command_line); // ne pas avoir d'action en double (cf. répertoire d'extension)
 			$command_line = implode("\n", $command_line);
 
@@ -144,4 +140,19 @@ function idm_nom_tables_principales() {
 	$tables_principales = array_keys($tables_principales);
 
 	return $tables_principales;
+}
+
+function idm_formater_command_documents($documents, $dir_img_server, $dir_img) {
+	if (!is_array($documents)) {
+		return false;
+	}
+	$command_line = array();
+
+	foreach ($documents as $document) {
+		$command_line[] = "if [ -d " . $dir_img_server . $document['extension'] . '/ ]; then echo ""; else mkdir -p ' . $dir_img_server . $document['extension'] . '/ ; fi';
+		$command_line[] = "cd " . $dir_img_server . $document['extension'] . '/';
+		$command_line[] = 'if [ -f ' . $dir_img_server . $document['fichier'] . ' ]; then echo "Le fichier ' . $dir_img_server . $document['fichier'] . ' existe" ; else wget --spider -v ' . $config_idm . $dir_img . $document['fichier'] . ' && wget ' . $config_idm . $dir_img . $document['fichier'] . ' || echo "Le fichier ' . $config_idm . $dir_img . $document['fichier'] . ' n\'est pas accessible" ; fi';
+	}
+
+	return $command_line;
 }
