@@ -38,7 +38,7 @@ function idm_command_line() {
 	idm_create_repository_img();
 	$adresse_site = lire_config('adresse_site');
 	$config_idm = lire_config('idm/source');
-	$dir_img_server = $_SERVER['DOCUMENT_ROOT'] . preg_replace("/\.\.\//", '', _DIR_IMG);
+	$dir_img_server = $_SERVER['DOCUMENT_ROOT'] . '/' . preg_replace("/\.\.\//", '', _DIR_IMG);
 	$dir_img = preg_replace("/\.\.\//", '/', _DIR_IMG);
 	/**
 	 * Si l'url source est la même que le présent site,
@@ -147,6 +147,9 @@ function idm_formater_command_documents($documents, $dir_img_server, $dir_img) {
 		return false;
 	}
 	$command_line = array();
+	include_spip('base/abstract_sql');
+	include_spip('inc/config');
+	$config_idm = lire_config('idm/source');
 
 	foreach ($documents as $document) {
 		$command_line[] = "if [ -d " . $dir_img_server . $document['extension'] . '/ ]; then echo ""; else mkdir -p ' . $dir_img_server . $document['extension'] . '/ ; fi';
