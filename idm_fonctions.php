@@ -54,13 +54,17 @@ function idm_command_line() {
 			$command_line[] = "#!/bin/bash";
 			$command_line = array_merge($command_line, idm_formater_command_documents($documents, $dir_img_server, $dir_img));
 
+			$command_line[] = 'scriptpath="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"';
+			$command_line[] = 'rm -rf ${scriptpath}/"${BASH_SOURCE[0]}"'; // auto-delete du script à la fin de son exécution
 			$command_line = array_unique($command_line); // ne pas avoir d'action en double (cf. répertoire d'extension)
+			spip_log(count($command_line) . " lignes de commande", 'idm');
 			$command_line = implode("\n", $command_line);
 
 			try {
-				$handle = fopen(_DIR_RACINE . "import_medias.sh", 'w');
+				$handle = fopen(_DIR_TMP . "import_medias.sh", 'w');
 				fwrite($handle, $command_line);
 				fclose($handle);
+				spip_log('Le fichier import_medias.sh a été créé ici : ' . _DIR_TMP . 'import_medias.sh', 'idm');
 
 				return true;
 			} catch (Exception $e) {
@@ -118,13 +122,17 @@ function idm_bash_objet($_objets = 'articles') {
 					}
 				}
 			}
+			$command_line[] = 'scriptpath="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"';
+			$command_line[] = 'rm -rf ${scriptpath}/"${BASH_SOURCE[0]}"'; // auto-delete du script à la fin de son exécution
 			$command_line = array_unique($command_line); // ne pas avoir d'action en double
+			spip_log(count($command_line) . " lignes de commande", 'idm');
 			$command_line = implode("\n", $command_line);
 
 			try {
-				$handle = fopen(_DIR_RACINE . 'import_logos_'. $objet .'.sh', 'w');
+				$handle = fopen(_DIR_TMP . 'import_logos_'. $objet .'.sh', 'w');
 				fwrite($handle, $command_line);
 				fclose($handle);
+				spip_log('Le fichier  ' . 'import_logos_'. $objet . '.sh a été créé ici : ' . _DIR_TMP  . 'import_logos_'. $objet .'.sh', 'idm');
 
 				return true;
 			} catch (Exception $e) {
