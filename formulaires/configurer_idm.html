@@ -8,12 +8,12 @@
 	<form method="post" action="#ENV{action}">
 		<div>
 			#ACTION_FORMULAIRE{#ENV{action}}
-			<ul>
+			<ul class="editer-groupe">
 				[(#SAISIE{input, source,
 				label=<:idm:cfg_url_source_label:>,
 				explication=<:idm:cfg_url_source_explication:>})]
 					[(#CONFIG{idm/source}|match{^http}|oui)
-					<li>
+					<li class="editer">
 						<a class="idm document_add importer_medias" href="[(#URL_ECRIRE{idm})]"><:idm:idm_icone_label:></a>
 					</li>
 					]

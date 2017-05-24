@@ -4,7 +4,7 @@
 	</nom>
 	<icon>prive/themes/spip/images/idm-32.png</icon>
 	<auteur>Teddy Payet</auteur>
-	<version>0.2.1</version>
+	<version>0.3.0</version>
 	<etat>test</etat>
 	<description>
 		<multi>
@@ -21,7 +21,7 @@
 		<inclure>idm_autorisations.php</inclure>
 	</pipeline>
 
-	<necessite id="SPIP" version="[2.1.0;3.1.99]"/>
+	<necessite id="SPIP" version="[2.1.0;3.2.99]"/>
 	<necessite id="saisies" version="[1.14.0;]"/>
 	<necessite id="iterateurs" version="[1.0.0;]"/>
 

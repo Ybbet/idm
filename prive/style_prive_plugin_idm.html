@@ -33,15 +33,25 @@ Valeurs par defaut :
 #SET{color_info,#c5e41c}
 */
 
-	.idm #contenu .explication {
-		margin-bottom: 2em;
-	}
+.idm #contenu .explication {
+	margin-bottom: 2em;
+}
 
-	.configurer_idm #contenu form ul li .idm.importer_medias {
-		padding-left: 20px;
-		background-image: url(["(#CHEMIN{prive/themes/spip/images/idm-16.png})"]);
-		background-position: left center;
-		background-repeat: no-repeat;
-		line-height: 20px;
-		display: inline-block;
-	}
+.configurer_idm #contenu form ul li .idm.importer_medias {
+	padding-left: 20px;
+	background-image: url(["(#CHEMIN{prive/themes/spip/images/idm-16.png})"]);
+	background-position: left center;
+	background-repeat: no-repeat;
+	line-height: 20px;
+	display: inline-block;
+}
+
+.idm #contenu .success, .idm #contenu .notice, .idm #contenu .error {
+	border: none;
+	padding-top: 0;
+	padding-right: 0;
+	padding-bottom: 0;
+	background-position: 2px 0;
+	background-color: transparent;
+	margin: 0;
+}

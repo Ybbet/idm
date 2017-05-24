@@ -9,30 +9,38 @@ Pour éviter un 'paradoxe', on ne lance pas la création du fichier shell.
 ]
 [(#URL_SITE_SPIP|match{^#CONFIG{idm/source}}|?{
 <div class='notice'><:idm:environnement_source_info:></div>})]
-[(#SET{objets_exclus,#LISTE{spip_jobs,spip_types_documents,spip_forum,spip_messages,spip_petitions,spip_signatures,spip_depots,spip_plugins,spip_paquets,spip_documents,spip_formulaires,spip_formulaires_reponses,spip_formulaires_reponses_champs}})]
+[(#SET{objets_exclus,#LISTE{spip_jobs,spip_types_documents,spip_forum,spip_messages,spip_petitions,spip_signatures,spip_depots,spip_plugins,spip_paquets,spip_formulaires,spip_formulaires_reponses,spip_formulaires_reponses_champs}})]
 <B_objets>
 	<table class="table spip liste">
 		<thead>
 			<tr>
-				<th><:idm:nom_objets_label:></th>
-				<th><:idm:action_label:></th>
+				<th class="principal"><:idm:nom_objets_label:></th>
+				<th class="secondaire fichier"><:idm:fichier_bash_label:></th>
+				<th class="secondaire action"><:idm:action_label:></th>
 			</tr>
 		</thead>
 		<tbody>
-		<tr>
-			<td>spip_documents</td>
-			<td>[(#VAL|idm_command_line|?{
-				<div class='success'><:idm:fichier_bash_idm_creation_ok{fichier=import_medias.sh}:></div>,
-				<div class='notice'><:idm:fichier_bash_idm_creation_ko{fichier=import_medias.sh}:></div>})]</td>
-		</tr>
-<BOUCLE_objets (DATA) {source table, #VAL|idm_nom_tables_principales} {par valeur} {valeur !IN #GET{objets_exclus}} {si #URL_SITE_SPIP|match{^#CONFIG{idm/source}}|non}>
-	<tr>[(#SET{objet,#VALEUR|objet_type})]
-		<td>#VALEUR</td>
-		<td>
-			[(#VALEUR|idm_bash_objet|?{
-			<div class='success'><:idm:fichier_bash_idm_creation_ok:></div>,
-			<div class='notice'><:idm:fichier_bash_idm_creation_ko:></div>})]
+<BOUCLE_objets (DATA) {source table, #VAL|idm_nom_tables_principales} {par valeur} {valeur !IN #GET{objets_exclus}} {si #CONFIG{idm/source}|match{^#URL_SITE_SPIP}|non}>
+	<tr class="[(#VALEUR|objet_type)]">
+		<td class="principal">[(#VALEUR|objet_type|objet_info{texte_objets}|_T)]</td>
+		[(#VALEUR|idm_test_objet_vide|non)<td class="secondaire fichier">
+			[(#VALEUR|idm_bash_file_presence|?{
+			<div class='success'><:idm:fichier_bash_idm_creation:>[ (#VALEUR|idm_bash_file_date|affdate_heure)]</div>,
+			<div class='notice'><:idm:fichier_bash_idm_inexistant:></div>})]
 		</td>
+		<td class="secondaire action">
+			[(#BOUTON_ACTION{[(#VALEUR|idm_bash_file_presence|?{<:idm:btn_regenerate_bash:>,<:idm:btn_generate_bash:>})],
+				[(#URL_ACTION_AUTEUR{generate_bash,#VALEUR,#SELF})],
+				ajax
+			})]
+			[(#VALEUR|idm_bash_file_presence|oui)
+				[(#BOUTON_ACTION{<:idm:btn_supprimer_bash:>,
+					[(#URL_ACTION_AUTEUR{supprimer_bash,#VALEUR,#SELF})],
+					ajax
+				})]
+			]
+		</td>]
+		[(#VALEUR|idm_test_objet_vide|oui)<td colspan="2"><div class="error"> <:idm:table_vide:></div></td>]
 	</tr>
 </BOUCLE_objets>
 		</tbody>

@@ -17,7 +17,7 @@ function idm_create_repository_img() {
 }
 
 /**
- * Cette fonction va créer un fichier `prod_importer_documents.sh` à la racine du site.
+ * Cette fonction va créer un fichier `importer_medias.sh` dans le répertoire `tmp/` du site.
  * Ce fichier contiendra un script bash pour importer tous les documents du site (cf. stockés dans la table `spip_documents`) et en allant les chercher sur le site source par `http`.
  * Il ne faut pas oublier de renseigner l'url du site source dans le formulaire `?exec=configurer_idm`
  * De plus, si le site source est la même url que le présent site, la fonction ne sera pas exécutée pour des questions de pertinence et de paradoxe.
@@ -44,12 +44,13 @@ function idm_command_line() {
 	 * Si l'url source est la même que le présent site,
 	 * la fonction ne se lancera pas.
 	 */
-	if (preg_match('/^http/', $config_idm) and !preg_match("/^" . $config_idm . "/", $adresse_site)) {
+	if (preg_match(',^http,', $config_idm) and !preg_match(",^" . $config_idm . ",", $adresse_site)) {
 		$documents = sql_allfetsel('fichier, extension', 'spip_documents', "distant='non'", '', 'extension');
 		/**
 		 * Si on a des documents, on peut procéder à l'alimentation du script sh
 		 */
 		if (is_array($documents) and count($documents) > 0) {
+			idm_bash_file_delete('spip_documents');
 			$command_line = array();
 			$command_line[] = "#!/bin/bash";
 			$command_line = array_merge($command_line, idm_formater_command_documents($documents, $dir_img_server, $dir_img));
@@ -79,6 +80,7 @@ function idm_command_line() {
 function idm_bash_objet($_objets = 'articles') {
 	include_spip('inc/config');
 	include_spip('inc/chercher_logo');
+	include_spip('inc/filtres');
 	$spip_version = spip_version();
 	$spip_num = intval($spip_version);
 	if ($spip_num == 2) {
@@ -93,10 +95,10 @@ function idm_bash_objet($_objets = 'articles') {
 	 * Si l'url source est la même que le présent site,
 	 * la fonction ne se lancera pas.
 	 */
-	if (preg_match('/^http/', $config_idm) and !preg_match("/^" . $config_idm . "/", $adresse_site)) {
+	if (preg_match(',^http,', $config_idm) and !preg_match(",^" . $config_idm . ",", $adresse_site)) {
 		$dir_img_server = $_SERVER['DOCUMENT_ROOT'] . preg_replace("/\.\.\//", '/', _DIR_IMG);
 		$dir_img = preg_replace("/\.\.\//", '/', _DIR_IMG);
-		$objet = objet_type($_objets);
+		$objet = objet_type($_objets); /* Une sécurité pour récupérer le bon objet */
 		$table_objet_sql = table_objet_sql($objet);
 		$id_table_objet = id_table_objet($objet);
 		$type_logo = type_du_logo($id_table_objet);
@@ -113,12 +115,13 @@ function idm_bash_objet($_objets = 'articles') {
 			$command_line = array();
 			$command_line[] = "#!/bin/bash";
 			$command_line[] = "cd " . $dir_img_server;
+			$count_objets = count($objets_bdd);
 
-			foreach ($objets_bdd as $objet_bdd) {
+			foreach ($objets_bdd as $index => $objet_bdd) {
 				foreach ($modes_logos as $mode) {
 					foreach ($formats_logos as $format) {
 						$logo_objet = $type_logo . $mode . $objet_bdd[$id_table_objet] . '.' . $format;
-						$command_line[] = 'if [ -f ' . $dir_img_server . $logo_objet . ' ]; then echo "Le fichier ' . $dir_img_server . $logo_objet . ' existe" ; else wget --spider -v ' . $config_idm . $dir_img . $logo_objet . ' && wget ' . $config_idm . $dir_img . $logo_objet . ' || echo "Le fichier ' . $config_idm . $dir_img . $logo_objet . ' n\'est pas accessible" ; fi';
+						$command_line[] = 'echo ""; echo "' . ($index + 1) . '/' . $count_objets . '"; if [ -f ' . $dir_img_server . $logo_objet . ' ]; then echo "Le fichier ' . $dir_img_server . $logo_objet . ' existe" ; else wget --spider -v ' . $config_idm . $logo_objet . ' && wget ' . $config_idm . $logo_objet . ' || echo "Le fichier ' . $config_idm . $logo_objet . ' n\'est pas accessible" ; fi';
 					}
 				}
 			}
@@ -129,10 +132,10 @@ function idm_bash_objet($_objets = 'articles') {
 			$command_line = implode("\n", $command_line);
 
 			try {
-				$handle = fopen(_DIR_TMP . 'import_logos_'. $objet .'.sh', 'w');
+				$handle = fopen(_DIR_TMP . 'import_logos_' . $objet . '.sh', 'w');
 				fwrite($handle, $command_line);
 				fclose($handle);
-				spip_log('Le fichier  ' . 'import_logos_'. $objet . '.sh a été créé ici : ' . _DIR_TMP  . 'import_logos_'. $objet .'.sh', 'idm');
+				spip_log('Le fichier  ' . 'import_logos_' . $objet . '.sh a été créé ici : ' . _DIR_TMP . 'import_logos_' . $objet . '.sh', 'idm');
 
 				return true;
 			} catch (Exception $e) {
@@ -141,6 +144,7 @@ function idm_bash_objet($_objets = 'articles') {
 		}
 	}
 
+	return false;
 }
 
 function idm_nom_tables_principales() {
@@ -158,12 +162,141 @@ function idm_formater_command_documents($documents, $dir_img_server, $dir_img) {
 	include_spip('base/abstract_sql');
 	include_spip('inc/config');
 	$config_idm = lire_config('idm/source');
+	$count_documents = count($documents);
 
-	foreach ($documents as $document) {
+	foreach ($documents as $index => $document) {
 		$command_line[] = "if [ -d " . $dir_img_server . $document['extension'] . '/ ]; then echo ""; else mkdir -p ' . $dir_img_server . $document['extension'] . '/ ; fi';
 		$command_line[] = "cd " . $dir_img_server . $document['extension'] . '/';
-		$command_line[] = 'if [ -f ' . $dir_img_server . $document['fichier'] . ' ]; then echo "Le fichier ' . $dir_img_server . $document['fichier'] . ' existe" ; else wget --spider -v ' . $config_idm . $dir_img . $document['fichier'] . ' && wget ' . $config_idm . $dir_img . $document['fichier'] . ' || echo "Le fichier ' . $config_idm . $dir_img . $document['fichier'] . ' n\'est pas accessible" ; fi';
+		$command_line[] = 'echo ""; echo "' . ($index + 1) . '/' . $count_documents . '"; if [ -f ' . $dir_img_server . $document['fichier'] . ' ]; then echo "Le fichier ' . $dir_img_server . $document['fichier'] . ' existe" ; else wget --spider -v ' . $config_idm . $document['fichier'] . ' && wget ' . $config_idm . $document['fichier'] . ' || echo "Le fichier ' . $config_idm . $document['fichier'] . ' n\'est pas accessible" ; fi';
 	}
 
 	return $command_line;
+}
+
+/**
+ * Vérifier si le fichier bash de l'objet est présent.
+ *
+ * @param string $_objets table sql de l'objet désiré. Exemple : spip_documents
+ * @return bool true si le fichier existe.
+ */
+function idm_bash_file_presence($_objets = 'spip_documents') {
+	$fichier = idm_bash_file_prepare($_objets);
+	if ($fichier === false) {
+		return false;
+	}
+
+	if (is_file($fichier)) {
+		return true;
+	}
+
+	return false;
+}
+
+/**
+ * Supprimer le fichier bash de l'objet s'il existe.
+ *
+ * @param string $_objets nom de l'objet sous la forme : `spip_objets
+ * @return bool true si la suppression du fichier bash a pu se faire
+ *  false
+ * - si aucun objet n'est renseigné en paramètre de la fonction
+ * - si le fichier bash n'existe pas.
+ * - si le fichier existe mais n'a pu être supprimé.
+ */
+function idm_bash_file_delete($_objets = 'spip_documents') {
+	$fichier = idm_bash_file_prepare($_objets);
+	if ($fichier === false) {
+		return false;
+	}
+
+	if (idm_bash_file_presence($_objets)) {
+		include_spip('inc/flock');
+
+		return supprimer_fichier($fichier);
+	}
+
+	return false;
+}
+
+/**
+ * Récupérer la date de création du fichier bash de l'objet
+ *
+ * @param string $_objets
+ * @return bool|string
+ */
+function idm_bash_file_date($_objets = 'spip_documents') {
+
+	$fichier = idm_bash_file_prepare($_objets);
+	if ($fichier === false) {
+		return false;
+	}
+	if (idm_bash_file_presence($_objets)) {
+
+		return date("Y-m-d H:i:s", filectime($fichier));
+	}
+
+	return false;
+}
+
+/**
+ * Construire le nom du fichier bash de l'objet.
+ *
+ * @param string $_objets
+ * @return bool|string
+ */
+function idm_bash_file_prepare($_objets = 'spip_documents') {
+	if (empty($_objets) or is_null($_objets) or !is_string($_objets)) {
+		trigger_error("Le paramètre de la fonction " . __FUNCTION__ . " n'est pas une chaine de caractères.", E_USER_ERROR);
+
+		return false;
+	}
+	include_spip('inc/config');
+	include_spip('inc/filtres');
+	$spip_version = spip_version();
+	$spip_num = intval($spip_version);
+	if ($spip_num == 2) {
+		include_spip('base/connect_sql');
+	} else {
+		include_spip('base/abstract_sql');
+		include_spip('base/objets');
+	}
+	$objet = objet_type($_objets); /* Une sécurité pour récupérer le bon objet */
+	$fichier = _DIR_TMP . 'import_logos_' . $objet . '.sh';
+	if ($_objets === 'spip_documents') {
+		$fichier = _DIR_TMP . 'import_medias.sh';
+	}
+
+	return $fichier;
+}
+
+/**
+ * Vérifier s'il y a des enregistrements faits dans la table de l'objet.
+ *
+ * @param string $_objets
+ * @return bool
+ */
+function idm_test_objet_vide($_objets = 'spip_documents') {
+	if (empty($_objets) or is_null($_objets) or !is_string($_objets)) {
+		trigger_error("Le paramètre de la fonction " . __FUNCTION__ . " n'est pas une chaine de caractères.", E_USER_ERROR);
+
+		return false;
+	}
+	include_spip('inc/filtres');
+	$spip_version = spip_version();
+	$spip_num = intval($spip_version);
+	if ($spip_num == 2) {
+		include_spip('base/connect_sql');
+	} else {
+		include_spip('base/abstract_sql');
+		include_spip('base/objets');
+	}
+	$objet = objet_type($_objets); /* Une sécurité pour récupérer le bon objet */
+	$table_objet_sql = table_objet_sql($objet);
+
+	$compteur = sql_countsel($table_objet_sql);
+
+	if (empty($compteur) or $compteur === false or $compteur === 0) {
+		return true;
+	}
+
+	return false;
 }
