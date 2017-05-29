@@ -23,7 +23,9 @@ function action_generate_bash_dist($arg = null) {
 		include_spip('idm_fonctions');
 		$result = false;
 		if ($arg === 'spip_documents') {
-			$result = idm_command_line();
+			$result = idm_bash_medias();
+		} elseif ($arg === 'spip') {
+			$result = idm_bash_spip();
 		} else {
 			include_spip('base/objets');
 			$result = idm_bash_objet(table_objet($arg));

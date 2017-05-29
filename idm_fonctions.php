@@ -32,7 +32,7 @@ function idm_create_repository_img() {
  *
  * @return bool
  */
-function idm_command_line() {
+function idm_bash_medias() {
 	include_spip('base/abstract_sql');
 	include_spip('inc/config');
 	idm_create_repository_img();
@@ -61,16 +61,8 @@ function idm_command_line() {
 			spip_log(count($command_line) . " lignes de commande", 'idm');
 			$command_line = implode("\n", $command_line);
 
-			try {
-				$handle = fopen(_DIR_TMP . "import_medias.sh", 'w');
-				fwrite($handle, $command_line);
-				fclose($handle);
-				spip_log('Le fichier import_medias.sh a été créé ici : ' . _DIR_TMP . 'import_medias.sh', 'idm');
-
-				return true;
-			} catch (Exception $e) {
-				echo 'Caught exception: ', $e->getMessage(), "\n";
-			}
+			// On écrit le fichier rempli de ses lignes de commandes
+			return idm_bash_file_create(idm_bash_file_prepare('spip_documents'), $command_line);
 		}
 	}
 
@@ -131,22 +123,58 @@ function idm_bash_objet($_objets = 'articles') {
 			spip_log(count($command_line) . " lignes de commande", 'idm');
 			$command_line = implode("\n", $command_line);
 
-			try {
-				$handle = fopen(_DIR_TMP . 'import_logos_' . $objet . '.sh', 'w');
-				fwrite($handle, $command_line);
-				fclose($handle);
-				spip_log('Le fichier  ' . 'import_logos_' . $objet . '.sh a été créé ici : ' . _DIR_TMP . 'import_logos_' . $objet . '.sh', 'idm');
-
-				return true;
-			} catch (Exception $e) {
-				echo 'Caught exception: ', $e->getMessage(), "\n";
-			}
+			// On écrit le fichier rempli de ses lignes de commandes
+			return idm_bash_file_create(idm_bash_file_prepare($_objets), $command_line);
 		}
 	}
 
 	return false;
 }
 
+function idm_bash_spip() {
+	include_spip('inc/config');
+	include_spip('inc/chercher_logo');
+	include_spip('inc/filtres');
+	$spip_version = spip_version();
+	$spip_num = intval($spip_version);
+	if ($spip_num == 2) {
+		include_spip('base/connect_sql');
+	} else {
+		include_spip('base/abstract_sql');
+		include_spip('base/objets');
+	}
+	$adresse_site = lire_config('adresse_site');
+	$config_idm = lire_config('idm/source');
+	$dir_img_server = $_SERVER['DOCUMENT_ROOT'] . preg_replace("/\.\.\//", '/', _DIR_IMG);
+	$modes_logos = array('on', 'off');
+	global $formats_logos;
+	$objets_bdd = array('site', 'rub');
+	$command_line = array();
+	$command_line[] = "#!/bin/bash";
+	$command_line[] = "cd " . $dir_img_server;
+	$count_objets = count($objets_bdd);
+	foreach ($objets_bdd as $index => $objet_bdd) {
+		foreach ($modes_logos as $mode) {
+			foreach ($formats_logos as $format) {
+				$logo_objet = $objet_bdd . $mode . '0.' . $format;
+				$command_line[] = 'echo ""; echo "' . ($index + 1) . '/' . $count_objets . '"; if [ -f ' . $dir_img_server . $logo_objet . ' ]; then echo "Le fichier ' . $dir_img_server . $logo_objet . ' existe" ; else wget --spider -v ' . $config_idm . $logo_objet . ' && wget ' . $config_idm . $logo_objet . ' || echo "Le fichier ' . $config_idm . $logo_objet . ' n\'est pas accessible" ; fi';
+			}
+		}
+	}
+	$command_line[] = 'scriptpath="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"';
+	$command_line[] = 'rm -rf ${scriptpath}/"${BASH_SOURCE[0]}"'; // auto-delete du script à la fin de son exécution
+	$command_line = array_unique($command_line); // ne pas avoir d'action en double
+	spip_log(count($command_line) . " lignes de commande", 'idm');
+	$command_line = implode("\n", $command_line);
+
+	return idm_bash_file_create(idm_bash_file_prepare('spip'), $command_line);
+}
+
+/**
+ * Lister les tables principales de SPIP
+ *
+ * @return array tableau contenant le nom de chaque table principale
+ */
 function idm_nom_tables_principales() {
 	$tables_principales = $GLOBALS['tables_principales'];
 	$tables_principales = array_keys($tables_principales);
@@ -259,10 +287,13 @@ function idm_bash_file_prepare($_objets = 'spip_documents') {
 		include_spip('base/abstract_sql');
 		include_spip('base/objets');
 	}
-	$objet = objet_type($_objets); /* Une sécurité pour récupérer le bon objet */
-	$fichier = _DIR_TMP . 'import_logos_' . $objet . '.sh';
 	if ($_objets === 'spip_documents') {
 		$fichier = _DIR_TMP . 'import_medias.sh';
+	} else if ($_objets === 'spip') {
+		$fichier = _DIR_TMP . 'import_medias_spip.sh';
+	} else {
+		$objet = objet_type($_objets); /* Une sécurité pour récupérer le bon objet */
+		$fichier = _DIR_TMP . 'import_logos_' . $objet . '.sh';
 	}
 
 	return $fichier;
@@ -299,4 +330,29 @@ function idm_test_objet_vide($_objets = 'spip_documents') {
 	}
 
 	return false;
+}
+
+/**
+ * Créer le fichier bash avec ses lignes de commandes
+ *
+ * @param string $fichier Chemin vers le fichier bash
+ * @param string $commands_line le contenu à mettre dans le fichier bash
+ * @return bool
+ */
+function idm_bash_file_create($fichier = _DIR_TMP . 'test.sh', $commands_line = '') {
+
+	if (is_array($commands_line)) {
+		$commands_line = implode("\n", $commands_line);
+	}
+	try {
+		$handle = fopen($fichier, 'w');
+		fwrite($handle, $commands_line);
+		fclose($handle);
+		spip_log('Le fichier  ' . basename($fichier) . ' a été créé.' . $fichier, 'idm');
+
+		return true;
+	} catch (Exception $e) {
+		echo 'Caught exception: ', $e->getMessage(), "\n";
+	}
+
 }
