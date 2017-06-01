@@ -1,4 +1,4 @@
-<h1><:idm:idm_titre:></h1>
+<h1 class="grostitre"><:idm:idm_titre:></h1>
 
 <div class="explication">
 	<:idm:idm_explication:>
@@ -38,9 +38,9 @@ Pour éviter un 'paradoxe', on ne lance pas la création du fichier shell.
 				]
 				</td>
 			</tr>
-<BOUCLE_objets (DATA) {source table, #VAL|idm_nom_tables_principales} {par valeur} {valeur !IN #GET{objets_exclus}} {si #CONFIG{idm/source}|match{^#URL_SITE_SPIP}|non}>
+<BOUCLE_objets (DATA) {source table, #VAL|idm_nom_tables_principales} {par valeur} {valeur !IN #GET{objets_exclus}} {si #CONFIG{idm/source}|match{^#URL_SITE_SPIP}|non} {si #CONFIG{idm/source}|match{^http}|oui}>
 	<tr class="[(#VALEUR|objet_type)]">
-		<td class="principal">[(#VALEUR|objet_type|objet_info{texte_objets}|_T)]</td>
+		<td class="principal">[(#VALEUR|objet_type|objet_info{texte_objets}|_T|sinon{[(#VALEUR|objet_type|ucfirst)]})]</td>
 		[(#VALEUR|idm_test_objet_vide|non)<td class="secondaire fichier">
 			[(#VALEUR|idm_bash_file_presence|?{
 			<div class='success'><:idm:fichier_bash_idm_creation:>[ (#VALEUR|idm_bash_file_date|affdate_heure)]</div>,
@@ -64,3 +64,5 @@ Pour éviter un 'paradoxe', on ne lance pas la création du fichier shell.
 		</tbody>
 	</table>
 </B_objets>
+<div class='notice'><:idm:idm_non_configure:><br/><a href="[(#URL_ECRIRE{configurer_idm})]"><:idm:titre_page_configurer_idm:></a></div>
+<//B_objets>
