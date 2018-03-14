@@ -35,6 +35,7 @@ $GLOBALS[$GLOBALS['idx_lang']] = array(
 	'idm_icone_label' => 'Importer les médias de la source',
 	'idm_titre' => 'Script d’importation des documents',
 	'idm_explication' => 'Depuis cette page, vous pourrez générer les fichiers bash désirés.<br/>Un administrateur devra exécuter ce script en lignes de commande pour importer les documents sur le serveur du présent site. Toutefois, si l’url du site source est la même que le présent site, le script ne sera pas créé pas mesure de sécurité.',
+	'idm_non_configure' => 'L’url du site source n’a pas été configuré. Merci de le faire.',
 
 	// N
 	'nom_objets_label' => 'Nom des objets',

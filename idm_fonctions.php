@@ -176,7 +176,13 @@ function idm_bash_spip() {
  * @return array tableau contenant le nom de chaque table principale
  */
 function idm_nom_tables_principales() {
-	$tables_principales = $GLOBALS['tables_principales'];
+	if (function_exists('lister_tables_objets_sql')) {
+		/* On est en SPIP >= 3.0 */
+		include_spip('base/objets');
+		$tables_principales = lister_tables_objets_sql();
+	} else {
+		$tables_principales = $GLOBALS['tables_principales'];
+	}
 	$tables_principales = array_keys($tables_principales);
 
 	return $tables_principales;
